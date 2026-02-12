@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pixel Detective</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="{{ 'victory-bg' if won else '' }}">
+
+    {% if won %}
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+    {% endif %}
+
+    <header>
+        <h1>PIXEL DETECTIVE</h1>
+    </header>
+
+    <main>
+        <div class="game-container">
+            <img src="{{ url_for('static', filename='temp/' + image) }}?v={{ range(1, 9999) | random }}" alt="Mystery">
+            
+            <p class="message {{ 'success' if won else '' }}">{{ message }}</p>
+
+            {% if not won %}
+            <form method="POST">
+                <input type="text" name="guess" placeholder="Qui est-ce ?" autofocus autocomplete="off">
+                <button type="submit">VÉRIFIER</button>
+            </form>
+            {% endif %}
+
+            <div class="controls">
+                <a href="/reset" class="reset-btn">Nouvelle partie</a>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
