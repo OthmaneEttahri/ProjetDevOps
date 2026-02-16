@@ -1,0 +1,53 @@
+services:
+  # --- Service 1 : L'API Flask ---
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: pixel-api
+    env_file: .env
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - ${IMAGE_PATH}:/app/images:ro      # Lecture seule (ro) pour la sécurité
+      - ${TEMP_PATH}:/app/static/temp    # Partagé avec le worker et nginx
+    networks:
+      - frontend-net
+      - backend-net
+    # L'API ne redémarre pas en boucle si elle crash, sauf si on lui demande
+    restart: unless-stopped
+
+  # --- Service 2 : Le Worker Batch ---
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: pixel-worker
+    volumes:
+      - ${IMAGE_PATH}:/app/images:ro
+      - ${TEMP_PATH}:/app/static/temp
+    networks:
+      - backend-net
+    # Le worker fait son job et s'arrête, on ne veut pas qu'il redémarre
+    restart: "no"
+
+  # --- Service 3 : Le Reverse Proxy Nginx ---
+  proxy:
+    image: nginx:1.25-alpine
+    container_name: pixel-proxy
+    ports:
+      - "${PROXY_PORT}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${TEMP_PATH}:/app/static/temp:ro # Nginx sert les images directement
+    networks:
+      - frontend-net
+    depends_on:
+      api:
+        condition: service_healthy # Attend que le healthcheck de l'API soit OK
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge

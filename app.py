@@ -2,7 +2,14 @@ import os
 import cv2
 import random
 import unicodedata
+import shutil
 from flask import Flask, render_template, request, session, redirect, url_for
+
+
+# à faire :
+# - supprimer les images temporaires en début de session (utiliser/créer un worker)
+
+
 
 app = Flask(__name__)
 app.secret_key = "devops_secret_key"
@@ -43,6 +50,38 @@ def apply_blur(image_name, attempt, won):
     cv2.imwrite(os.path.join(TEMP_FOLDER, temp_name), img)
     return temp_name
 
+
+# Fonctions vérifications pour /health
+# pas trop d'inspirations sur les tests à faire donc on fait vérification dossier images, écriture dans temp et check espace disque
+
+def check_image_folder():
+    if not os.path.exists(IMAGE_FOLDER) and len(os.listdir(IMAGE_FOLDER)) > 0:
+        return True
+    return False
+
+def check_temp_folder():
+    return os.access(TEMP_FOLDER, os.W_OK)
+
+def check_disk_space():
+    total, used, free = shutil.disk_usage("/")
+    return free > 100 * 1024 * 1024 # 100Mo libre
+
+@app.route("/health")
+def health():
+    checks = {
+        "image_folder": check_image_folder(),
+        "temp_folder": check_temp_folder(),
+        "disk_space": check_disk_space()
+    }
+    status_overall = "healthy" if all(checks.values()) else "unhealthy"
+    status_code = 200 if status_overall == "healthy" else 500
+
+    return {
+        "status": status_overall,
+        "checks": checks
+    }, status_code
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if 'target' not in session:
@@ -78,6 +117,8 @@ def index():
 def reset():
     session.clear()
     return redirect(url_for('index'))
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
