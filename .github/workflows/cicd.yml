@@ -33,7 +33,7 @@ jobs:
 
     # 4. Lancement de la stack (comme en local)
     - name: Démarrer l'infrastructure
-      run: docker-compose up -d --build
+      run: docker compose up -d --build
 
     # 5. Attente du Healthcheck
     - name: Attente du démarrage de l'API (Healthcheck)
