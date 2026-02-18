@@ -55,7 +55,8 @@ def apply_blur(image_name, attempt, won):
 # pas trop d'inspirations sur les tests à faire donc on fait vérification dossier images, écriture dans temp et check espace disque
 
 def check_image_folder():
-    if not os.path.exists(IMAGE_FOLDER) and len(os.listdir(IMAGE_FOLDER)) > 0:
+    # Correction : On vérifie que le dossier EXISTE et n'est pas vide
+    if os.path.exists(IMAGE_FOLDER) and len(os.listdir(IMAGE_FOLDER)) > 0:
         return True
     return False
 
@@ -74,7 +75,7 @@ def health():
         "disk_space": check_disk_space()
     }
     status_overall = "healthy" if all(checks.values()) else "unhealthy"
-    status_code = 200 if status_overall == "healthy" else 500
+    status_code = 200 if status_overall == "healthy" else 503
 
     return {
         "status": status_overall,
@@ -90,6 +91,8 @@ def index():
         session['won'] = False
 
     target_image = session['target']
+    if not target_image:
+        return "Aucune image valide disponible dans le dossier /images.", 503
     message = ""
     
     if request.method == "POST" and not session['won']:

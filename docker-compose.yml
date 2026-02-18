@@ -9,12 +9,11 @@ services:
     environment:
       - FLASK_ENV=production
     volumes:
-      - ${IMAGE_PATH}:/app/images:ro      # Lecture seule (ro) pour la sécurité
-      - ${TEMP_PATH}:/app/static/temp    # Partagé avec le worker et nginx
+      - ${IMAGE_PATH}:/app/images:ro      # Les images restent lues depuis Windows
+      - shared_static:/app/static         # MAGIE : Volume géré par Docker !
     networks:
       - frontend-net
       - backend-net
-    # L'API ne redémarre pas en boucle si elle crash, sauf si on lui demande
     restart: unless-stopped
 
   # --- Service 2 : Le Worker Batch ---
@@ -25,10 +24,9 @@ services:
     container_name: pixel-worker
     volumes:
       - ${IMAGE_PATH}:/app/images:ro
-      - ${TEMP_PATH}:/app/static/temp
+      - shared_static:/app/static         # Partage total avec l'API
     networks:
       - backend-net
-    # Le worker fait son job et s'arrête, on ne veut pas qu'il redémarre
     restart: "no"
 
   # --- Service 3 : Le Reverse Proxy Nginx ---
@@ -36,18 +34,21 @@ services:
     image: nginx:1.25-alpine
     container_name: pixel-proxy
     ports:
-      - "${PROXY_PORT}:80"
+      - "${PROXY_PORT:-80}:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ${TEMP_PATH}:/app/static/temp:ro # Nginx sert les images directement
+      - shared_static:/app/static:ro      # Nginx accède au CSS, au Temp et au Catalog !
     networks:
       - frontend-net
     depends_on:
       api:
-        condition: service_healthy # Attend que le healthcheck de l'API soit OK
+        condition: service_healthy
 
 networks:
   frontend-net:
     driver: bridge
   backend-net:
     driver: bridge
+
+volumes:
+  shared_static: # Déclaration du volume nommé

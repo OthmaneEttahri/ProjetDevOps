@@ -27,11 +27,11 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Healtcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://127.0.0.1:8080/health || exit 1
 
 # Port exposé
 EXPOSE 8080
 
 # Commande de lancement
-CMD ["python", "api.py"]
+CMD ["python", "app.py"]
