@@ -6,10 +6,6 @@ import shutil
 from flask import Flask, render_template, request, session, redirect, url_for
 
 
-# à faire :
-# - supprimer les images temporaires en début de session (utiliser/créer un worker)
-
-
 
 app = Flask(__name__)
 app.secret_key = "devops_secret_key"
@@ -21,14 +17,14 @@ ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp'}
 os.makedirs(TEMP_FOLDER, exist_ok=True)
 
 def normalize_text(text):
-    """Supprime les accents, les majuscules et les espaces superflus."""
+    """Supprime les accents, les majuscules et les espaces superflus comme ça plus simple"""
     if not text: return ""
     text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode("utf-8")
     return text.lower().strip()
 
 def get_random_image():
     if not os.path.exists(IMAGE_FOLDER) or not os.listdir(IMAGE_FOLDER):
-        return None # Évite de planter si le dossier est vide
+        return None # évite de planter si le dossier est vide
     files = [f for f in os.listdir(IMAGE_FOLDER) if os.path.splitext(f)[1].lower() in ALLOWED_EXTENSIONS]
     return random.choice(files) if files else None
 
@@ -52,10 +48,11 @@ def apply_blur(image_name, attempt, won):
 
 
 # Fonctions vérifications pour /health
-# pas trop d'inspirations sur les tests à faire donc on fait vérification dossier images, écriture dans temp et check espace disque
+# pas trop d'inspirations sur les tests
+# donc on fait vérification dossier images, écriture dans temp et check espace disque
 
 def check_image_folder():
-    # Correction : On vérifie que le dossier EXISTE et n'est pas vide
+    # Correction git : On vérifie que le dossier EXISTE et n'est pas vide
     if os.path.exists(IMAGE_FOLDER) and len(os.listdir(IMAGE_FOLDER)) > 0:
         return True
     return False
@@ -98,7 +95,6 @@ def index():
     if request.method == "POST" and not session['won']:
         guess = normalize_text(request.form.get("guess", ""))
         
-        # Extraire les parties du nom de fichier (ex: "Theodore_Roosevelt.jpg" -> ["theodore", "roosevelt"])
         filename_raw = os.path.splitext(target_image)[0]
         valid_parts = [normalize_text(p) for p in filename_raw.split('_')]
 

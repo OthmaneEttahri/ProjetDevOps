@@ -62,7 +62,7 @@ button {
 .controls { margin-top: 30px; }
 .reset-btn { color: #888; text-decoration: none; }
 
-/* --- ANIMATION FEUX D'ARTIFICE (Votre Code) --- */
+/* --- ANIMATION FEUX D'ARTIFICE --- */
 @keyframes firework {
   0% { transform: translate(var(--x), var(--initialY)); width: var(--initialSize); opacity: 1; }
   50% { width: 0.5vmin; opacity: 1; }
