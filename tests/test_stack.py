@@ -2,7 +2,7 @@ import requests
 import subprocess
 import json
 
-BASE_URL = "http://localhost:80"
+BASE_URL = "http://localhost:8081/"
 
 def test_1_proxy_routing_api():
     """Vérifie que le Proxy redirige bien vers l'API"""
