@@ -32,7 +32,7 @@ def clean_temp_files(max_age_seconds=600):
     print(f"[WORKER] {count} fichiers supprimés.")
 
 def audit_data_quality():
-    #Vérifie noms des fichiers images et génére un rapport 
+    #Vérifie noms des fichiers images et génére un rapport  json
     print("[WORKER] Étape 2 : Audit de la qualité des données...")
     report = {
         "timestamp": datetime.now().isoformat(),
