@@ -116,5 +116,13 @@ Appliquer des politiques de redémarrage
 Lancement
 Build et démarrage :
 
+-> modifier le .env.example en .env seulement
+
 ```bash
 docker compose up --build -d
+docker ps # Pour vérifier l'état du conteneur
+```
+
+Et enfin plus qu'à aller sur http://localhost:8081/
+
+
