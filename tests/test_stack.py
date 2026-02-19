@@ -33,6 +33,7 @@ def test_3_security_non_root():
     assert user != "root"
     assert user == "appuser"
     print(f"✅ Security OK (User is: {user})")
+    #test
 
 if __name__ == "__main__":
     try:
