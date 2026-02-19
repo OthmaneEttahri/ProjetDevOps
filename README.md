@@ -61,3 +61,60 @@ Retour :
 
 HTTP 200 si tous les checks sont valides
 HTTP 500 sinon
+
+3.2 Worker batch
+Le worker est un composant autonome qui :
+
+Supprime les fichiers temporaires obsolètes
+Réalise un audit simple des noms d’images
+Génère un rapport JSON (catalog.json)
+Gère correctement les signaux SIGTERM et SIGINT
+Retourne un code d’erreur non nul en cas d’échec
+
+Il s’exécute puis se termine proprement.
+
+---
+
+3.3 Reverse Proxy (Nginx)
+Rôle :
+
+Recevoir les requêtes HTTP externes
+Router vers l’API Flask
+Servir les fichiers statiques temporaires
+
+Le proxy dépend du healthcheck de l’API avant démarrage.
+
+---
+
+Conteneurisation
+Chaque composant possède son propre Dockerfile :
+
+Dockerfile.api
+Dockerfile.worker
+Dockerfile.proxy
+
+Bonnes pratiques appliquées
+Pas d’utilisation du tag latest
+Images légères (Alpine lorsque possible)
+Exécution en utilisateur non-root
+Isolation des volumes
+Healthcheck défini pour l’API
+Politique de redémarrage adaptée selon le service
+
+---
+
+Orchestration avec Docker Compose
+Le fichier docker-compose.yml permet de :
+
+Construire les images
+Définir les réseaux
+Définir les volumes
+Externaliser la configuration via .env
+Gérer les dépendances entre services
+Appliquer des politiques de redémarrage
+
+Lancement
+Build et démarrage :
+
+```bash
+docker compose up --build -d
